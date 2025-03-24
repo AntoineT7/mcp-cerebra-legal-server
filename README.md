@@ -103,6 +103,85 @@ Edit the file at `~/Library/Application Support/Claude/claude_desktop_config.jso
 
 Once the server is added to Claude, you can use the tools in your conversations:
 
+### System Prompt Integration
+
+For optimal AI interaction with these legal tools, it's essential to include proper guidance in the system prompt. These tools follow the same AI → Human interaction model as standard Cline tools but with domain-specific enhancements.
+
+The system prompt should include detailed documentation for each tool:
+
+```
+## legal_think
+Description: A structured legal reasoning tool that helps analyze complex legal issues with domain-specific guidance and templates. This tool enables step-by-step legal analysis with feedback on reasoning quality.
+
+Parameters:
+- thought: (required) The current legal reasoning step
+- thoughtNumber: (required) Current thought number in sequence
+- totalThoughts: (required) Estimated total thoughts needed
+- nextThoughtNeeded: (required) Whether another thought step is needed
+- category: (optional) Legal domain category (auto-detected if not provided)
+- references: (optional) Array of legal references
+- isRevision: (optional) Whether this revises previous thinking
+- revisesThoughtNumber: (optional) Which thought is being reconsidered
+- requestGuidance: (optional) Whether to request domain-specific guidance
+- requestTemplate: (optional) Whether to request a domain-specific template
+
+Usage:
+<legal_think>
+<thought>Your legal reasoning step here</thought>
+<thoughtNumber>Current thought number</thoughtNumber>
+<totalThoughts>Estimated total thoughts</totalThoughts>
+<nextThoughtNeeded>true or false</nextThoughtNeeded>
+<category>Legal domain (optional)</category>
+<references>Array of references (optional)</references>
+<isRevision>true or false (optional)</isRevision>
+<revisesThoughtNumber>Thought number being revised (optional)</revisesThoughtNumber>
+<requestGuidance>true or false (optional)</requestGuidance>
+<requestTemplate>true or false (optional)</requestTemplate>
+</legal_think>
+
+## legal_ask_followup_question
+Description: Ask the user a legal domain-specific question to gather additional information needed to complete the task. This tool enhances the standard ask_followup_question with legal domain detection, terminology formatting, and domain-specific suggested options.
+
+Parameters:
+- question: (required) The question to ask the user. This will be automatically enhanced with appropriate legal terminology.
+- options: (optional) An array of 2-5 options for the user to choose from. If not provided, domain-specific options will be automatically suggested.
+- context: (optional) Additional context to help with domain detection and question formatting.
+
+Usage:
+<legal_ask_followup_question>
+<question>Your question here</question>
+<options>
+Array of options here (optional), e.g. ["Option 1", "Option 2", "Option 3"]
+</options>
+<context>Additional context to help with domain detection (optional)</context>
+</legal_ask_followup_question>
+
+## legal_attempt_completion
+Description: Present the result of your work to the user with proper legal structure and formatting. This tool enhances the standard attempt_completion with legal domain detection, document structuring, and citation formatting.
+
+Parameters:
+- result: (required) The result of the task. This will be automatically formatted with proper legal structure.
+- command: (optional) A CLI command to execute to show a live demo of the result to the user.
+- context: (optional) Additional context to help with domain detection and result formatting.
+
+Usage:
+<legal_attempt_completion>
+<result>
+Your final result description here
+</result>
+<command>Command to demonstrate result (optional)</command>
+<context>Additional context to help with domain detection (optional)</context>
+</legal_attempt_completion>
+```
+
+This guidance ensures the AI understands:
+1. These are specialized versions of standard tools
+2. They maintain the same AI → Human interaction flow
+3. They have additional capabilities and parameters
+4. How to properly format the tool calls
+
+Without this guidance, the AI might not fully leverage the domain-specific capabilities built into these tools.
+
 #### 1. Using legal_think
 
 The legal_think tool helps you analyze complex legal issues with structured thinking:
