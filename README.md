@@ -1,6 +1,6 @@
 # Cerebra Legal MCP Server
 
-An enterprise-grade MCP server for legal reasoning and analysis based on the "think" tool concept from Anthropic's engineering blog.
+An enterprise-grade MCP server for legal reasoning and analysis based on the "think" tool concept from [Anthropic's engineering blog](https://www.anthropic.com/engineering/claude-think-tool).
 
 ## Overview
 
@@ -240,6 +240,10 @@ npm run build
 
 This project is available on GitHub at:
 https://github.com/yoda-digital/mcp-cerebra-legal-server
+
+## References
+
+- [The "think" tool: Enabling Claude to stop and think in complex tool use situations](https://www.anthropic.com/engineering/claude-think-tool) - Anthropic Engineering Blog
 
 ## License
 
