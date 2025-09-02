@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node build/server.js",
     "dev": "ts-node --esm src/index.ts"
 },
   "keywords": [
