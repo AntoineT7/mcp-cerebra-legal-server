@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Run server (compiled JS entrypoint, not TS)
-CMD ["node", "dist/server.js"]
+CMD ["node", "build/server.js"]
 
 # Cloud Run listens on $PORT (default 8080)
 EXPOSE 8080
