@@ -1,4 +1,4 @@
-import { Tool } from "@modelcontextprotocol/sdk/types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types";
 import chalk from "chalk";
 
 /**
@@ -64,7 +64,7 @@ export const LEGAL_ATTEMPT_COMPLETION_TOOL: Tool = {
 /**
  * Thought history
  */
-const thoughtHistory: any[] = [];
+const thoughtHistory: Array<Record<string, unknown>> = [];
 
 /**
  * Domain detection
@@ -83,9 +83,16 @@ function detectDomain(text: string): string {
 }
 
 /**
- * Format thought for logs (optional)
+ * Format thought for logs
  */
-function formatThought(thought: string, domain: string, thoughtNumber: number, totalThoughts: number, isRevision?: boolean, revisesThoughtNumber?: number): string {
+function formatThought(
+  thought: string,
+  domain: string,
+  thoughtNumber: number,
+  totalThoughts: number,
+  isRevision?: boolean,
+  revisesThoughtNumber?: number
+): string {
   let prefix = "";
   let color = chalk.blue;
 
@@ -106,11 +113,18 @@ function formatThought(thought: string, domain: string, thoughtNumber: number, t
 /**
  * Process legal_think
  */
-export function processLegalThink(input: any) {
+export function processLegalThink(input: Record<string, any>) {
   const domain = input.category || detectDomain(input.thought || "");
   thoughtHistory.push({ ...input, domain, timestamp: new Date() });
 
-  const formatted = formatThought(input.thought, domain, input.thoughtNumber, input.totalThoughts, input.isRevision, input.revisesThoughtNumber);
+  const formatted = formatThought(
+    input.thought,
+    domain,
+    input.thoughtNumber,
+    input.totalThoughts,
+    input.isRevision,
+    input.revisesThoughtNumber
+  );
   console.error(formatted);
 
   return {
@@ -132,7 +146,7 @@ export function processLegalThink(input: any) {
 /**
  * Process legal_ask_followup_question
  */
-export function processLegalAskFollowupQuestion(input: any) {
+export function processLegalAskFollowupQuestion(input: Record<string, any>) {
   const domain = detectDomain(input.context ? `${input.question} ${input.context}` : input.question);
   const options = input.options && input.options.length ? input.options : ["Option 1", "Option 2", "Option 3"];
 
@@ -149,7 +163,7 @@ export function processLegalAskFollowupQuestion(input: any) {
 /**
  * Process legal_attempt_completion
  */
-export function processLegalAttemptCompletion(input: any) {
+export function processLegalAttemptCompletion(input: Record<string, any>) {
   const domain = detectDomain(input.context ? `${input.result} ${input.context}` : input.result);
 
   return {
