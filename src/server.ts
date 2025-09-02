@@ -11,7 +11,7 @@ import {
   processLegalThink,
   processLegalAskFollowupQuestion,
   processLegalAttemptCompletion
-} from "./mcp-tools";
+} from "./mcp-tools.js";
 
 const PORT = process.env.PORT || 8080;
 
