@@ -1,21 +1,16 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Server } from "@modelcontextprotocol/sdk/server/index";
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-  ListToolsRequest,
-  CallToolRequest,
-} from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsRequestSchema, CallToolRequestSchema, CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 
-// Import all your tool definitions and processors
+// Import your tool definitions and processors
 import {
   LEGAL_THINK_TOOL,
   LEGAL_ASK_FOLLOWUP_QUESTION_TOOL,
   LEGAL_ATTEMPT_COMPLETION_TOOL,
   processLegalThink,
   processLegalAskFollowupQuestion,
-  processLegalAttemptCompletion,
+  processLegalAttemptCompletion
 } from "./mcp-tools.js";
 
 const PORT = process.env.PORT || 8080;
@@ -29,23 +24,18 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
-// Register handlers with typed requests
-server.setRequestHandler(ListToolsRequestSchema, async (_request: ListToolsRequest) => {
-  return {
-    tools: [
-      LEGAL_THINK_TOOL,
-      LEGAL_ASK_FOLLOWUP_QUESTION_TOOL,
-      LEGAL_ATTEMPT_COMPLETION_TOOL,
-    ],
-  };
-});
+// Register handlers
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [LEGAL_THINK_TOOL, LEGAL_ASK_FOLLOWUP_QUESTION_TOOL, LEGAL_ATTEMPT_COMPLETION_TOOL],
+}));
 
 server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
   const name = request.params.name;
+  const args: Record<string, any> = request.params.arguments || {}; // ensure arguments is always an object
 
-  if (name === "legal_think") return processLegalThink(request.params.arguments);
-  if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(request.params.arguments);
-  if (name === "legal_attempt_completion") return processLegalAttemptCompletion(request.params.arguments);
+  if (name === "legal_think") return processLegalThink(args);
+  if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
+  if (name === "legal_attempt_completion") return processLegalAttemptCompletion(args);
 
   return {
     content: [{ type: "text", text: `Unknown tool: ${name}` }],
@@ -65,9 +55,9 @@ app.get("/tools", async (_req: Request, res: Response) => {
 
 app.post("/call-tool", async (req: Request, res: Response) => {
   try {
-    const { name, arguments: args } = req.body as { name: string; arguments?: unknown };
+    const { name, arguments: args } = req.body as { name: string; arguments?: Record<string, any> };
     if (!name) return res.status(400).json({ error: "Missing tool name" });
-    const result = await server.callTool(name, args);
+    const result = await server.callTool(name, args || {}); // default to empty object
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
