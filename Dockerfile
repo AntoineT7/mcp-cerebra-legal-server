@@ -24,9 +24,12 @@ RUN npm run build
 # RUN npm install --omit=dev
 # COPY --from=0 /usr/src/app/build ./build
 
-# Start server from compiled JS
-CMD ["node", "build/server.js"]
 
 # Cloud Run expects this port
 ENV PORT 8080
+ENV NODE_ENV=production
+
 EXPOSE 8080
+
+# Start server from compiled JS
+CMD ["node", "build/server.js"]
