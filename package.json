@@ -5,9 +5,9 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-  "build": "tsc",
-  "start": "npm run build && node build/index.js",
-  "dev": "ts-node --esm src/index.ts"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node --esm src/index.ts"
 },
   "keywords": [
     "mcp",
