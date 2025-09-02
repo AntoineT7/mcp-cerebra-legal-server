@@ -13,7 +13,6 @@ import {
 } from "./mcp-tools.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
-
 const app = express();
 app.use(bodyParser.json());
 
@@ -23,27 +22,35 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
+// Define the list of tools
+const toolList = [LEGAL_THINK_TOOL, LEGAL_ASK_FOLLOWUP_QUESTION_TOOL, LEGAL_ATTEMPT_COMPLETION_TOOL];
+
 // Register handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [LEGAL_THINK_TOOL, LEGAL_ASK_FOLLOWUP_QUESTION_TOOL, LEGAL_ATTEMPT_COMPLETION_TOOL],
+  tools: toolList,
 }));
 
-server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
-  const name = request.params.name;
-  const args = request.params.arguments ?? {};
-
+// ✅ Reusable function for the core tool-calling logic
+async function executeTool(name: string, args: Record<string, any>) {
   if (name === "legal_think") return processLegalThink(args);
   if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
   if (name === "legal_attempt_completion") return processLegalAttemptCompletion(args);
 
   return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+}
+
+server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
+  const name = request.params.name;
+  const args = request.params.arguments ?? {};
+  // ✅ Use the reusable function here
+  return executeTool(name, args);
 });
 
 // HTTP endpoints for Cloud Run
 app.get("/tools", async (_req: Request, res: Response) => {
   try {
-    const tools = await server.getTools();
-    res.json(tools);
+    // ✅ FIX: Directly return the defined list of tools
+    res.json({ tools: toolList });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
@@ -53,7 +60,9 @@ app.post("/call-tool", async (req: Request, res: Response) => {
   try {
     const { name, arguments: args } = req.body as { name: string; arguments?: Record<string, unknown> };
     if (!name) return res.status(400).json({ error: "Missing tool name" });
-    const result = await server.callTool(name, args ?? {});
+
+    // ✅ FIX: Use the reusable function here too
+    const result = await executeTool(name, args ?? {});
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
