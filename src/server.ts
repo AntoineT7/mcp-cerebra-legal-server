@@ -1,7 +1,7 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index";
+import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types";
 
 // Import all your tool definitions and processors from src/mcp-tools.ts
 import {
@@ -11,7 +11,7 @@ import {
   processLegalThink,
   processLegalAskFollowupQuestion,
   processLegalAttemptCompletion
-} from "./mcp-tools.js";
+} from "./mcp-tools";
 
 const PORT = process.env.PORT || 8080;
 
@@ -40,7 +40,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 // HTTP endpoints for Cloud Run
-app.get("/tools", async (req, res) => {
+app.get("/tools", async (_req: Request, res: Response) => {
   try {
     const tools = await server.getTools();
     res.json(tools);
@@ -49,9 +49,9 @@ app.get("/tools", async (req, res) => {
   }
 });
 
-app.post("/call-tool", async (req, res) => {
+app.post("/call-tool", async (req: Request, res: Response) => {
   try {
-    const { name, arguments: args } = req.body;
+    const { name, arguments: args } = req.body as { name: string; arguments?: unknown };
     if (!name) return res.status(400).json({ error: "Missing tool name" });
     const result = await server.callTool(name, args);
     res.json(result);
