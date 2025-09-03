@@ -4,6 +4,7 @@ import { LegalKnowledgeBase } from '../shared/LegalKnowledgeBase.js';
 import { CitationFormatter } from '../shared/CitationFormatter.js';
 import { LegalThinkInput, ThoughtData } from '../shared/types.js';
 import { logger } from '../utils/logger.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'; // 👈 1. Import the correct type
 
 /**
  * LegalThinkTool class for implementing the legal_think tool
@@ -37,7 +38,7 @@ export class LegalThinkTool {
    * @param input - The input data
    * @returns Tool response
    */
-  public processThought(input: unknown): { content: Array<{ type: string; text: string }>; isError?: boolean } {
+  public processThought(input: unknown): CallToolResult { // 👈 2. Use CallToolResult as the return type
     try {
       logger.debug('Processing thought request', input);
       
@@ -105,11 +106,14 @@ export class LegalThinkTool {
       
       logger.debug('Thought processed successfully', response);
       
+      // 👇 3. Ensure the 'type' property is explicitly "text"
+      const responseContent = {
+        type: "text" as const, // The 'as const' helps TypeScript know this is a literal
+        text: JSON.stringify(response, null, 2)
+      };
+
       return {
-        content: [{
-          type: "text",
-          text: JSON.stringify(response, null, 2)
-        }]
+        content: [responseContent]
       };
     } catch (error) {
       // Log and handle errors
@@ -117,7 +121,7 @@ export class LegalThinkTool {
       
       return {
         content: [{
-          type: "text",
+          type: "text" as const,
           text: JSON.stringify({
             error: error instanceof Error ? error.message : String(error),
             status: 'failed'
