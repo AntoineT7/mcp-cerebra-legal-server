@@ -65,7 +65,14 @@ async function executeTool(name: string, args: Record<string, any>): Promise<Cal
   if (name === "legal_ask_followup_question") return legalAskFollowupQuestionTool.processQuestion(args);
   if (name === "legal_attempt_completion") return legalAttemptCompletionTool.processCompletion(args);
 
-  return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+  // 👇 Ensure this object matches the CallToolResult shape perfectly
+  return { 
+    content: [{ 
+      type: "text" as const, 
+      text: `Unknown tool: ${name}` 
+    }], 
+    isError: true 
+  };
 }
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
