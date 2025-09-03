@@ -68,7 +68,7 @@ async function executeTool(name: string, args: Record<string, any>) {
   return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
 }
 
-server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const name = request.params.name;
   const args = request.params.arguments ?? {};
   return executeTool(name, args);
