@@ -30,7 +30,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: toolList,
 }));
 
-// ✅ Reusable function for the core tool-calling logic
 async function executeTool(name: string, args: Record<string, any>) {
   if (name === "legal_think") return processLegalThink(args);
   if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
@@ -42,14 +41,22 @@ async function executeTool(name: string, args: Record<string, any>) {
 server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
   const name = request.params.name;
   const args = request.params.arguments ?? {};
-  // ✅ Use the reusable function here
   return executeTool(name, args);
+});
+
+// Add a root endpoint for health checks and basic info
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: "ok",
+    name: "mcp-cerebra-legal-server",
+    version: "1.0.0",
+    message: "Server is running. Use GET /tools to see available tools."
+  });
 });
 
 // HTTP endpoints for Cloud Run
 app.get("/tools", async (_req: Request, res: Response) => {
   try {
-    // ✅ FIX: Directly return the defined list of tools
     res.json({ tools: toolList });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -61,7 +68,6 @@ app.post("/call-tool", async (req: Request, res: Response) => {
     const { name, arguments: args } = req.body as { name: string; arguments?: Record<string, unknown> };
     if (!name) return res.status(400).json({ error: "Missing tool name" });
 
-    // ✅ FIX: Use the reusable function here too
     const result = await executeTool(name, args ?? {});
     res.json(result);
   } catch (err) {
