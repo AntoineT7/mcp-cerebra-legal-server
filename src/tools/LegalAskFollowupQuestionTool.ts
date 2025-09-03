@@ -1,7 +1,8 @@
 import { DomainDetector } from '../shared/DomainDetector.js';
 import { LegalKnowledgeBase } from '../shared/LegalKnowledgeBase.js';
-import { LegalAskFollowupQuestionInput, LegalAskFollowupQuestionResponse, ToolResponse } from '../shared/types.js';
+import { LegalAskFollowupQuestionInput, LegalAskFollowupQuestionResponse } from '../shared/types.js';
 import { logger } from '../utils/logger.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'; // 👈 1. Import the correct type
 
 /**
  * LegalAskFollowupQuestionTool class for implementing the legal_ask_followup_question tool
@@ -30,7 +31,7 @@ export class LegalAskFollowupQuestionTool {
    * @param input - The input data
    * @returns Tool response
    */
-  public processQuestion(input: unknown): ToolResponse {
+  public processQuestion(input: unknown): CallToolResult { // 👈 2. Use CallToolResult as the return type
     try {
       logger.debug('Processing question request', input);
       
@@ -61,11 +62,14 @@ export class LegalAskFollowupQuestionTool {
       
       logger.debug('Question processed successfully', response);
       
+      // 👇 3. Ensure the 'type' property is explicitly "text"
+      const responseContent = {
+        type: "text" as const, // The 'as const' helps TypeScript know this is a literal
+        text: JSON.stringify(response, null, 2)
+      };
+
       return {
-        content: [{
-          type: "text",
-          text: JSON.stringify(response, null, 2)
-        }]
+        content: [responseContent]
       };
     } catch (error) {
       // Log and handle errors
@@ -73,7 +77,7 @@ export class LegalAskFollowupQuestionTool {
       
       return {
         content: [{
-          type: "text",
+          type: "text" as const,
           text: JSON.stringify({
             error: error instanceof Error ? error.message : String(error),
             status: 'failed'
