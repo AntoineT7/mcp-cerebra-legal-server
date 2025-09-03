@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { ListToolsRequestSchema, CallToolRequestSchema, Tool } from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsRequestSchema, CallToolRequestSchema, Tool, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // ✨ NEW: Import your tool classes and their dependencies
 import { LegalThinkTool } from './tools/LegalThinkTool.js';
@@ -58,7 +58,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 }));
 
 // ✅ Reusable function for the core tool-calling logic
-async function executeTool(name: string, args: Record<string, any>) {
+async function executeTool(name: string, args: Record<string, any>): Promise<CallToolResult> {
   logger.info(`Executing tool: ${name}`);
   // ✨ UPDATED: Call the methods on your new class instances
   if (name === "legal_think") return legalThinkTool.processThought(args);
