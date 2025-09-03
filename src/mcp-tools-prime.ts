@@ -1,13 +1,13 @@
 // mcp-tools.ts
-import { Tool } from "@modelcontextprotocol/sdk/types";
-import { DomainDetector } from "../shared/DomainDetector";
-import { LegalKnowledgeBase } from "../shared/LegalKnowledgeBase";
-import { CitationFormatter } from "../shared/CitationFormatter";
-import { logger } from "../utils/logger";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
+import { DomainDetector } from "./shared/DomainDetector.js";
+import { LegalKnowledgeBase } from "./shared/LegalKnowledgeBase.js";
+import { CitationFormatter } from "./shared/CitationFormatter.js";
+import { logger } from "./utils/logger.js";
 
-import { LegalThinkTool } from "./tools/LegalThinkTool";
-import { LegalAskFollowupQuestionTool } from "./tools/LegalAskFollowupQuestionTool";
-import { LegalAttemptCompletionTool } from "./tools/LegalAttemptCompletionTool";
+import { LegalThinkTool } from "./tools/LegalThinkTool.js";
+import { LegalAskFollowupQuestionTool } from "./tools/LegalAskFollowupQuestionTool.js";
+import { LegalAttemptCompletionTool } from "./tools/LegalAttemptCompletionTool.js";
 
 // Shared dependencies (singletons)
 const domainDetector = new DomainDetector();
