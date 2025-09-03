@@ -3,14 +3,7 @@ import bodyParser from "body-parser";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
-import {
-  LEGAL_THINK_TOOL,
-  LEGAL_ASK_FOLLOWUP_QUESTION_TOOL,
-  LEGAL_ATTEMPT_COMPLETION_TOOL,
-  processLegalThink,
-  processLegalAskFollowupQuestion,
-  processLegalAttemptCompletion
-} from "./mcp-tools-prime.js";
+import { toolList, executeTool } from "./mcp-tools-prime.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
 const app = express();
@@ -22,42 +15,29 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
-// Define the list of tools
-const toolList = [LEGAL_THINK_TOOL, LEGAL_ASK_FOLLOWUP_QUESTION_TOOL, LEGAL_ATTEMPT_COMPLETION_TOOL];
-
-// Register handlers
+// Register ListTools handler
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: toolList,
 }));
 
-//async function executeTool(name: string, args: Record<string, any>) {
-//  if (name === "legal_think") return processLegalThink(args);
-//  if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
-//  if (name === "legal_attempt_completion") return processLegalAttemptCompletion(args);
-
-//  return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
-//}
-
-async function executeTool(name: string, args: Record<string, any>) {
-  switch (name) {
-    case "legal_think":
-      return processLegalThink(args);
-    case "legal_ask_followup_question":
-      return processLegalAskFollowupQuestion(args);
-    case "legal_attempt_completion":
-      return processLegalAttemptCompletion(args);
-    default:
-      return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
-  }
-}
-
+// Register CallTool handler
 server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
   const name = request.params.name;
   const args = request.params.arguments ?? {};
-  return executeTool(name, args);
+
+  try {
+    return await executeTool(name, args);
+  } catch (err) {
+    return {
+      content: [
+        { type: "text", text: err instanceof Error ? err.message : String(err) }
+      ],
+      isError: true
+    };
+  }
 });
 
-// Add a root endpoint for health checks and basic info
+// Root endpoint for health check
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     status: "ok",
@@ -67,7 +47,7 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
-// HTTP endpoints for Cloud Run
+// HTTP endpoint to list tools
 app.get("/tools", async (_req: Request, res: Response) => {
   try {
     res.json({ tools: toolList });
@@ -76,6 +56,7 @@ app.get("/tools", async (_req: Request, res: Response) => {
   }
 });
 
+// HTTP endpoint to call a tool
 app.post("/call-tool", async (req: Request, res: Response) => {
   try {
     const { name, arguments: args } = req.body as { name: string; arguments?: Record<string, unknown> };
@@ -88,7 +69,7 @@ app.post("/call-tool", async (req: Request, res: Response) => {
   }
 });
 
-// Cloud Run requires 0.0.0.0
+// Start server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Cerebra MCP HTTP server running on port ${PORT}`);
 });
