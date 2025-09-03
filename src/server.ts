@@ -10,7 +10,7 @@ import {
   processLegalThink,
   processLegalAskFollowupQuestion,
   processLegalAttemptCompletion
-} from "./mcp-tools.js";
+} from "./mcp-tools-prime.js";
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8080;
 const app = express();
@@ -30,12 +30,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: toolList,
 }));
 
-async function executeTool(name: string, args: Record<string, any>) {
-  if (name === "legal_think") return processLegalThink(args);
-  if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
-  if (name === "legal_attempt_completion") return processLegalAttemptCompletion(args);
+//async function executeTool(name: string, args: Record<string, any>) {
+//  if (name === "legal_think") return processLegalThink(args);
+//  if (name === "legal_ask_followup_question") return processLegalAskFollowupQuestion(args);
+//  if (name === "legal_attempt_completion") return processLegalAttemptCompletion(args);
 
-  return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+//  return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+//}
+
+async function executeTool(name: string, args: Record<string, any>) {
+  switch (name) {
+    case "legal_think":
+      return processLegalThink(args);
+    case "legal_ask_followup_question":
+      return processLegalAskFollowupQuestion(args);
+    case "legal_attempt_completion":
+      return processLegalAttemptCompletion(args);
+    default:
+      return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+  }
 }
 
 server.setRequestHandler(CallToolRequestSchema, async (request: typeof CallToolRequestSchema._type) => {
